@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Controller
@@ -29,7 +31,8 @@ public class authController {
     private userMapper mapper;
 
     @GetMapping("/callback")
-    public String GitCallback(HttpServletRequest request){
+    public String GitCallback(HttpServletRequest request,
+                              HttpServletResponse response){
         AccessTokenDTO accessTokenDTO = new AccessTokenDTO();
         String code = request.getParameter("code");
         accessTokenDTO.setCode(code);
@@ -39,14 +42,15 @@ public class authController {
         String accessToken = tokenParam.split("&")[0].split("=")[1];
         GithubUser githubUser = githubProvider.getUser(accessToken);
         if(githubUser != null){
-            request.getSession().setAttribute("user", githubUser);
             User user = new User();
             user.setName(githubUser.getLogin());
             user.setAccountId(String.valueOf(githubUser.getId()));
-            user.setToken(UUID.randomUUID().toString());
+            String token = UUID.randomUUID().toString();
+            user.setToken(token);
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
             mapper.insertUser(user);
+            response.addCookie(new Cookie("token", token));
             return "redirect:/";
         }else {
             return "redirect:/";
