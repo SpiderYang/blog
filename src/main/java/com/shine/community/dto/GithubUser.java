@@ -1,9 +1,21 @@
 package com.shine.community.dto;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 public class GithubUser {
     private String login;
     private Long id;
     private String bio;
+    @JSONField(name = "avatar_url")
+    private String avatar;
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
     public String getLogin() {
         return login;
